@@ -1,0 +1,187 @@
+apiVersion: v1
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/image.dockerRepositoryCheck: "2024-01-23T15:06:04Z"
+    creationTimestamp: "2024-01-23T15:06:04Z"
+    generation: 1
+    name: is-test
+    namespace: dev
+    resourceVersion: "304007"
+    uid: a4699b05-ac79-4cca-8555-e8ef65ae0c7f
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: bitnami/nginx
+      generation: 1
+      importPolicy:
+        importMode: Legacy
+      name: latest
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: image-registry.openshift-image-registry.svc:5000/dev/is-test
+    publicDockerImageRepository: default-route-openshift-image-registry.apps-crc.testing/dev/is-test
+    tags:
+    - items:
+      - created: "2024-01-23T15:06:04Z"
+        dockerImageReference: bitnami/nginx@sha256:b06dff7e64b254406d89f2ea34572018614b1c3714e44faad23161320e452e2b
+        generation: 1
+        image: sha256:b06dff7e64b254406d89f2ea34572018614b1c3714e44faad23161320e452e2b
+      tag: latest
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "2"
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"is-test:latest","namespace":"dev"},"fieldPath":"spec.template.spec.containers[?(@.name==\"is-test\")].image"}]'
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: "2024-01-23T15:08:59Z"
+    generation: 2
+    labels:
+      app: test
+      app.kubernetes.io/component: test
+      app.kubernetes.io/instance: test
+      app.kubernetes.io/name: is-test
+      stage: dev
+    name: test
+    namespace: dev
+    resourceVersion: "304557"
+    uid: c1ccf131-e5b8-4100-8d16-e89533f609b5
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        deployment: test
+        stage: dev
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          deployment: test
+          stage: dev
+      spec:
+        containers:
+        - image: bitnami/nginx@sha256:b06dff7e64b254406d89f2ea34572018614b1c3714e44faad23161320e452e2b
+          imagePullPolicy: IfNotPresent
+          name: is-test
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8443
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2024-01-23T15:09:03Z"
+      lastUpdateTime: "2024-01-23T15:09:03Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2024-01-23T15:08:59Z"
+      lastUpdateTime: "2024-01-23T15:09:03Z"
+      message: ReplicaSet "test-6f78bc9667" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    observedGeneration: 2
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    creationTimestamp: "2024-01-23T15:07:22Z"
+    name: test
+    namespace: dev
+    resourceVersion: "304216"
+    uid: ed0cae34-d6f7-4dc4-9dc5-f3c0c51a39c2
+  spec:
+    host: dev.apps-crc.testing
+    port:
+      targetPort: 8080
+    tls:
+      insecureEdgeTerminationPolicy: None
+      termination: edge
+    to:
+      kind: Service
+      name: test
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: "2024-01-23T15:07:22Z"
+        status: "True"
+        type: Admitted
+      host: dev.apps-crc.testing
+      routerCanonicalHostname: router-default.apps-crc.testing
+      routerName: default
+      wildcardPolicy: None
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: "2024-01-23T15:08:59Z"
+    labels:
+      app: test
+      app.kubernetes.io/component: test
+      app.kubernetes.io/instance: test
+      app.kubernetes.io/name: is-test
+      stage: dev
+    name: test
+    namespace: dev
+    resourceVersion: "304503"
+    uid: db428290-7513-4dc0-9e2f-292e5397ea93
+  spec:
+    clusterIP: 10.217.5.241
+    clusterIPs:
+    - 10.217.5.241
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: 8443-tcp
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
+    selector:
+      deployment: test
+      stage: dev
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+kind: List
+metadata:
+  resourceVersion: ""
